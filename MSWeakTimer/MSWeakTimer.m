@@ -6,7 +6,7 @@
 //
 //
 
-#import "MSWeakTimer.h"
+#import "include/MSWeakTimer.h"
 
 #import <libkern/OSAtomic.h>
 
