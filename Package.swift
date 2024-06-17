@@ -11,13 +11,18 @@ let package = Package(
     products: [
         .library(
             name: "MSWeakTimer",
-            targets: ["MSWeakTimer"]),
+            targets: ["MSWeakTimer"]
+        ),
     ],
     targets: [
         .target(
             name: "MSWeakTimer",
             dependencies: [],
             path: "MSWeakTimer",
-            publicHeadersPath: "include"),
+            publicHeadersPath: "include",
+            cSettings: [
+                .define("NS_BLOCK_ASSERTIONS", to: "1", .when(configuration: .release))
+            ]
+        )
     ]
 )
