@@ -8,7 +8,7 @@
 
 #import "include/MSWeakTimer.h"
 
-#import <libkern/OSAtomic.h>
+#import <stdatomic.h>
 
 #if !__has_feature(objc_arc)
     #error MSWeakTimer is ARC only. Either turn on ARC for the project or use -fobjc-arc flag
@@ -184,7 +184,8 @@
 {
     // We check with an atomic operation if it has already been invalidated. Ideally we would synchronize this on the private queue,
     // but since we can't know the context from which this method will be called, dispatch_sync might cause a deadlock.
-    if (!OSAtomicTestAndSetBarrier(7, &_timerFlags.timerIsInvalidated))
+    volatile atomic_bool timerIsInvalidated = _timerFlags.timerIsInvalidated;
+    if (!atomic_fetch_or(&timerIsInvalidated, 7))
     {
         dispatch_source_t timer = self.timer;
         dispatch_async(self.privateSerialQueue, ^{
@@ -197,7 +198,8 @@
 - (void)timerFired
 {
     // Checking attomatically if the timer has already been invalidated.
-    if (OSAtomicAnd32OrigBarrier(1, &_timerFlags.timerIsInvalidated))
+    volatile atomic_bool timerIsInvalidated = _timerFlags.timerIsInvalidated;
+    if (atomic_fetch_and(&timerIsInvalidated, 1))
     {
         return;
     }
